@@ -93,7 +93,7 @@ namespace Neo.Compiler.JVM
                         if (l.Value == m)
                         {
                             var srcm = l.Key;
-                            if (srcm.DeclaringType.superClass == "VerificationCode" && srcm.returnType == "System.Boolean")
+                            if (srcm.DeclaringType.superClass == "AntShares.SmartContract.Framework.VerificationCode" && srcm.returnType == "java.lang.Boolean")
                             {
                                 logger.Log("找到函数入口点:" + key);
                                 if (mainmethod != "")
