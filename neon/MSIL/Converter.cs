@@ -55,6 +55,8 @@ namespace Neo.Compiler.MSIL
             {
                 if (t.Key[0] == '<') continue;//系统的，不要
                 if (t.Key.Contains("_API_")) continue;//api的，不要
+                if (t.Key.Contains(".My."))
+                     continue;//vb system
                 foreach (var m in t.Value.methods)
                 {
                     if (m.Value.method == null) continue;
@@ -70,6 +72,8 @@ namespace Neo.Compiler.MSIL
             {
                 if (t.Key[0] == '<') continue;//系统的，不要
                 if (t.Key.Contains("_API_")) continue;//api的，不要
+                if (t.Key.Contains(".My."))
+                    continue;//vb system
                 foreach (var m in t.Value.methods)
                 {
                     if (m.Value.method == null) continue;
@@ -132,6 +136,7 @@ namespace Neo.Compiler.MSIL
                 throw new Exception("找不到入口函数，请检查");
 
             }
+            outModule.mainMethod = mainmethod;
             //得找到第一个函数
             this.LinkCode(mainmethod);
             //this.findFirstFunc();//得找到第一个函数

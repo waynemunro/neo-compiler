@@ -29,7 +29,7 @@ namespace Neo.Compiler
             //将body链接，生成this.code       byte[]
             //并计算 this.codehash            byte[]
         }
-
+        public string mainMethod;
         public Dictionary<string, AntsMethod> mapMethods = new Dictionary<string, AntsMethod>();
         //public Dictionary<string, byte[]> codes = new Dictionary<string, byte[]>();
         //public byte[] GetScript(byte[] script_hash)

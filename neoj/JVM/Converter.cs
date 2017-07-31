@@ -130,6 +130,7 @@ namespace Neo.Compiler.JVM
                 throw new Exception("找不到入口函数，请检查");
 
             }
+            outModule.mainMethod = mainmethod;
             //得找到第一个函数
             this.LinkCode(mainmethod);
             //this.findFirstFunc();//得找到第一个函数
