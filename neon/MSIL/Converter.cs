@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace Neo.Compiler.MSIL
@@ -256,8 +257,8 @@ namespace Neo.Compiler.MSIL
         //}
         static int getNumber(AntsCode code)
         {
-            if (code.code <= VM.OpCode.PUSHBYTES75)
-                return (int)code.code;
+            if (code.code <= VM.OpCode.PUSHBYTES75 && code.code >= VM.OpCode.PUSHBYTES1)
+                return (int)new BigInteger(code.bytes);
             else if (code.code == VM.OpCode.PUSH0) return 0;
             else if (code.code == VM.OpCode.PUSH1) return 1;
             else if (code.code == VM.OpCode.PUSH2) return 2;
@@ -415,6 +416,8 @@ namespace Neo.Compiler.MSIL
                 //需要地址轉換的情況
                 case CodeEx.Br:
                 case CodeEx.Br_S:
+                case CodeEx.Leave:
+                case CodeEx.Leave_S:
                     {
                         var code = _Convert1by1(VM.OpCode.JMP, src, to, new byte[] { 0, 0 });
                         code.needfix = true;
