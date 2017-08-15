@@ -19,7 +19,7 @@ namespace Neo.Compiler
             //set console
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             var log = new DefLogger();
-            log.Log("AntShars.Compiler.MSIL console app v" + Assembly.GetEntryAssembly().GetName().Version);
+            log.Log("Neo.Compiler.MSIL console app v" + Assembly.GetEntryAssembly().GetName().Version);
             if (args.Length == 0)
             {
                 log.Log("need one param for DLL filename.");
