@@ -57,12 +57,14 @@ namespace Neo.Compiler.MSIL
                 if (t.Key[0] == '<') continue;//系统的，不要
                 if (t.Key.Contains("_API_")) continue;//api的，不要
                 if (t.Key.Contains(".My."))
-                     continue;//vb system
+                    continue;//vb system
                 foreach (var m in t.Value.methods)
                 {
                     if (m.Value.method == null) continue;
+                    if (m.Value.method.IsAddOn || m.Value.method.IsRemoveOn) continue;//event 自动生成的代码，不要
                     AntsMethod nm = new AntsMethod();
                     nm.name = m.Value.method.FullName;
+                    nm.isPublic = m.Value.method.IsPublic;
                     this.methodLink[m.Value] = nm;
                     outModule.mapMethods[nm.name] = nm;
 
@@ -75,9 +77,12 @@ namespace Neo.Compiler.MSIL
                 if (t.Key.Contains("_API_")) continue;//api的，不要
                 if (t.Key.Contains(".My."))
                     continue;//vb system
+
                 foreach (var m in t.Value.methods)
                 {
                     if (m.Value.method == null) continue;
+                    if (m.Value.method.IsAddOn || m.Value.method.IsRemoveOn) continue;//event 自动生成的代码，不要
+
                     var nm = this.methodLink[m.Value];
                     //try
                     {
@@ -302,7 +307,7 @@ namespace Neo.Compiler.MSIL
                 }
             }
         }
-
+        string lastsfieldname;
         private int ConvertCode(ILMethod method, OpCode src, AntsMethod to)
         {
             int skipcount = 0;
@@ -674,6 +679,44 @@ namespace Neo.Compiler.MSIL
                     break;
                 case CodeEx.Ldfld:
                     _ConvertLdfld(src, to);
+                    break;
+
+                case CodeEx.Ldsfld:
+
+                    {
+
+                        var d = src.tokenUnknown as Mono.Cecil.FieldDefinition;
+                        //如果是readonly，可以pull个常量上来的
+                        if ((d.Attributes & Mono.Cecil.FieldAttributes.InitOnly) > 0)
+                        {
+
+                            break;
+                        }
+
+
+                        //如果是调用event导致的这个代码，只找出他的名字
+                        if(d.DeclaringType.HasEvents)
+                        {
+                            foreach(var ev in d.DeclaringType.Events)
+                            {
+                                if(ev.Name==d.Name&&ev.EventType.FullName==d.FieldType.FullName)
+                                {
+
+                                    Mono.Collections.Generic.Collection<Mono.Cecil.CustomAttribute> ca = ev.CustomAttributes;
+                                    lastsfieldname = d.Name;
+                                    foreach (var attr in ca)
+                                    {
+                                        if (attr.AttributeType.Name == "DisplayNameAttribute")
+                                        {
+                                            lastsfieldname = (string)attr.ConstructorArguments[0].Value;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
+                    }
                     break;
                 default:
 #if WITHPDB
