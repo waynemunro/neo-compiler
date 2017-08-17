@@ -263,15 +263,15 @@ namespace Neo.Compiler.MSIL
             return false;
 
         }
-        public bool IsNotifyCall(Mono.Cecil.MethodDefinition defs, Mono.Cecil.MethodReference refs, out string name)
+        public bool IsNotifyCall(Mono.Cecil.MethodDefinition defs, Mono.Cecil.MethodReference refs, AntsMethod to, out string name)
         {
-            name = this.lastsfieldname;
+            name = to.lastsfieldname;
             Mono.Cecil.TypeDefinition call = null;
             if (defs == null)
             {
                 try
                 {
-                    call = refs.DeclaringType.Resolve(); 
+                    call = refs.DeclaringType.Resolve();
                 }
                 catch
                 {//当不能取得这个，大半都是模板类
@@ -324,7 +324,7 @@ namespace Neo.Compiler.MSIL
             {
                 return 0;
             }
-            else if (IsNotifyCall(defs, refs, out callname))
+            else if (IsNotifyCall(defs, refs, to, out callname))
             {
                 calltype = 5;
             }
