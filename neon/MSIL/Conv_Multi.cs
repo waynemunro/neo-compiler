@@ -783,6 +783,17 @@ namespace Neo.Compiler.MSIL
             if(_type.FullName== "System.Void System.Numerics.BigInteger::.ctor(System.Byte[])")
             {
                 return 0;//donothing;
+
+            }
+            else if(_type.DeclaringType.FullName.Contains("Exception"))
+            {
+                _Convert1by1(VM.OpCode.NOP, src, to);//空白
+                var pcount = _type.Parameters.Count;
+                for(var i =0;i<pcount;i++)
+                {
+                    _Insert1(VM.OpCode.DROP, "", to);
+                }
+                return 0;
             }
             var type= _type.Resolve();
             _Convert1by1(VM.OpCode.NOP, src, to);//空白
