@@ -389,33 +389,58 @@ namespace Neo.Compiler.MSIL
                 }
                 else if (src.tokenMethod.Contains("::op_Equality(") || src.tokenMethod.Contains("::Equals("))
                 {
+                    var _ref = src.tokenUnknown as Mono.Cecil.MethodReference;
+
+                    if (_ref.DeclaringType.FullName == "System.Boolean"
+                        || _ref.DeclaringType.FullName == "System.Int32"
+                        || _ref.DeclaringType.FullName == "System.Numerics.BigInteger")
+                    {
+                        _Convert1by1(VM.OpCode.NUMEQUAL, src, to);
+                    }
+                    else
+                    {
+                        _Convert1by1(VM.OpCode.EQUAL, src, to);
+
+                    }
                     //各类==指令
                     //有可能有一些会特殊处理，故还保留独立判断
-                    if (src.tokenMethod == "System.Boolean System.String::op_Equality(System.String,System.String)")
-                    {
-                        _Convert1by1(VM.OpCode.EQUAL, src, to);
-                        return 0;
-                    }
-                    else if (src.tokenMethod == "System.Boolean System.Object::Equals(System.Object)")
-                    {
-                        _Convert1by1(VM.OpCode.EQUAL, src, to);
-                        return 0;
-                    }
-                    _Convert1by1(VM.OpCode.EQUAL, src, to);
+                    //if (src.tokenMethod == "System.Boolean System.String::op_Equality(System.String,System.String)")
+                    //{
+                    //    _Convert1by1(VM.OpCode.EQUAL, src, to);
+                    //    return 0;
+                    //}
+                    //else if (src.tokenMethod == "System.Boolean System.Object::Equals(System.Object)")
+                    //{
+                    //    _Convert1by1(VM.OpCode.EQUAL, src, to);
+                    //    return 0;
+                    //}
+                    //_Convert1by1(VM.OpCode.EQUAL, src, to);
                     return 0;
                 }
                 else if (src.tokenMethod.Contains("::op_Inequality("))
                 {
-                    //各类!=指令
-                    //有可能有一些会特殊处理，故还保留独立判断
-                    if (src.tokenMethod == "System.Boolean System.Numerics.BigInteger::op_Inequality(System.Numerics.BigInteger,System.Numerics.BigInteger)")
+                    var _ref= src.tokenUnknown as Mono.Cecil.MethodReference;
+                    if (_ref.DeclaringType.FullName == "System.Boolean"
+                        || _ref.DeclaringType.FullName == "System.Int32"
+                        || _ref.DeclaringType.FullName == "System.Numerics.BigInteger")
+                    {
+                        _Convert1by1(VM.OpCode.NUMNOTEQUAL, src, to);
+                    }
+                    else
                     {
                         _Convert1by1(VM.OpCode.INVERT, src, to);
                         _Insert1(VM.OpCode.EQUAL, "", to);
-                        return 0;
                     }
-                    _Convert1by1(VM.OpCode.INVERT, src, to);
-                    _Insert1(VM.OpCode.EQUAL, "", to);
+                    ////各类!=指令
+                    ////有可能有一些会特殊处理，故还保留独立判断
+                    //if (src.tokenMethod == "System.Boolean System.Numerics.BigInteger::op_Inequality(System.Numerics.BigInteger,System.Numerics.BigInteger)")
+                    //{
+                    //    _Convert1by1(VM.OpCode.INVERT, src, to);
+                    //    _Insert1(VM.OpCode.EQUAL, "", to);
+                    //    return 0;
+                    //}
+                    //_Convert1by1(VM.OpCode.INVERT, src, to);
+                    //_Insert1(VM.OpCode.EQUAL, "", to);
                     return 0;
                 }
                 else if (src.tokenMethod.Contains("::op_Addition("))
