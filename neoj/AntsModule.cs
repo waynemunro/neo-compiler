@@ -80,13 +80,16 @@ namespace Neo.Compiler
 
         }
         SHA1 sha1 = SHA1.Create();
-
+        public Dictionary<string, object> staticfields = new Dictionary<string, object>();
+       
     }
     public class AntsMethod
     {
+        public string _namespace;
         public string name;
         public List<AntsParam> paramtypes = new List<AntsParam>();
         public string returntype;
+        public bool isPublic = true;
         //临时变量
         public List<AntsParam> body_Variables = new List<AntsParam>();
 
@@ -133,7 +136,7 @@ namespace Neo.Compiler
         //    //将body链接，生成this.code       byte[]
         //    //并计算 this.codehash            byte[]
         //}
-
+        public string lastsfieldname;
     }
     public class AntsCode
     {
@@ -146,6 +149,7 @@ namespace Neo.Compiler
         public string debugILCode;
         public bool needfix = false;//lateparse tag
         public int srcaddr;
+        public int[] srcaddrswitch;
         public string srcfunc;
         public override string ToString()
         {

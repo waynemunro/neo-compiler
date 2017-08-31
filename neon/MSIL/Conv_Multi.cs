@@ -581,6 +581,12 @@ namespace Neo.Compiler.MSIL
                     _Convert1by1(VM.OpCode.ROLL, null, to);
                     _Convert1by1(VM.OpCode.SETITEM, null, to);
                     return 0;
+                } 
+                else if(src.tokenMethod== "System.UInt32 <PrivateImplementationDetails>::ComputeStringHash(System.String)")
+                {
+                    throw new Exception("需要neo.vm nuget更新以后，这个才可以放开，就可以处理 string switch了。");
+                    //_Convert1by1(VM.OpCode.CSHARPSTRHASH32, src, to);
+                    //return 0;
                 }
                 else
                 {
