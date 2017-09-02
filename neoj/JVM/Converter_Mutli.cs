@@ -416,7 +416,7 @@ namespace Neo.Compiler.JVM
 
             //移除上一条指令
             to.body_Codes.Remove(code.addr);
-            this.addr--;
+            this.addr = code.addr;
 
             OpCode next = src;
             int dupcount = 0;

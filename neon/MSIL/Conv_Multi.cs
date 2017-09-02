@@ -728,7 +728,7 @@ namespace Neo.Compiler.MSIL
 
                 //移除上一条指令
                 to.body_Codes.Remove(code.addr);
-                this.addr--;
+                this.addr = code.addr;
                 if (code.bytes != null)
                     this.addr -= code.bytes.Length;
 
