@@ -593,8 +593,8 @@ namespace Neo.Compiler.MSIL
                     _Convert1by1(VM.OpCode.ROLL, null, to);
                     _Convert1by1(VM.OpCode.SETITEM, null, to);
                     return 0;
-                } 
-                else if(src.tokenMethod== "System.UInt32 <PrivateImplementationDetails>::ComputeStringHash(System.String)")
+                }
+                else if (src.tokenMethod == "System.UInt32 <PrivateImplementationDetails>::ComputeStringHash(System.String)")
                 {
                     throw new Exception("需要neo.vm nuget更新以后，这个才可以放开，就可以处理 string switch了。");
                     //_Convert1by1(VM.OpCode.CSHARPSTRHASH32, src, to);
@@ -610,42 +610,49 @@ namespace Neo.Compiler.MSIL
                 throw new Exception("unknown call:" + src.tokenMethod);
             var md = src.tokenUnknown as Mono.Cecil.MethodReference;
             var pcount = md.Parameters.Count;
-            _Convert1by1(VM.OpCode.NOP, src, to);
-            if (pcount <= 1)
+
+            if(calltype==2)
             {
-            }
-            else if (pcount == 2)
-            {
-                _Insert1(VM.OpCode.SWAP, "swap 2 param", to);
-            }
-            else if (pcount == 3)
-            {
-                _InsertPush(2, "swap 0 and 2 param", to);
-                _Insert1(VM.OpCode.XSWAP, "", to);
+                //opcode call 
             }
             else
-            {
-                for (var i = 0; i < pcount / 2; i++)
+            {//翻转参数顺序
+                _Convert1by1(VM.OpCode.NOP, src, to);
+                if (pcount <= 1)
                 {
-                    int saveto = (pcount - 1 - i);
-                    _InsertPush(saveto, "load" + saveto, to);
-                    _Insert1(VM.OpCode.PICK, "", to);
-
-                    _InsertPush(i + 1, "load" + i + 1, to);
-                    _Insert1(VM.OpCode.PICK, "", to);
-
-
-                    _InsertPush(saveto + 2, "save to" + saveto + 2, to);
+                }
+                else if (pcount == 2)
+                {
+                    _Insert1(VM.OpCode.SWAP, "swap 2 param", to);
+                }
+                else if (pcount == 3)
+                {
+                    _InsertPush(2, "swap 0 and 2 param", to);
                     _Insert1(VM.OpCode.XSWAP, "", to);
-                    _Insert1(VM.OpCode.DROP, "", to);
+                }
+                else
+                {
+                    for (var i = 0; i < pcount / 2; i++)
+                    {
+                        int saveto = (pcount - 1 - i);
+                        _InsertPush(saveto, "load" + saveto, to);
+                        _Insert1(VM.OpCode.PICK, "", to);
 
-                    _InsertPush(i + 1, "save to" + i + 1, to);
-                    _Insert1(VM.OpCode.XSWAP, "", to);
-                    _Insert1(VM.OpCode.DROP, "", to);
+                        _InsertPush(i + 1, "load" + i + 1, to);
+                        _Insert1(VM.OpCode.PICK, "", to);
 
+
+                        _InsertPush(saveto + 2, "save to" + saveto + 2, to);
+                        _Insert1(VM.OpCode.XSWAP, "", to);
+                        _Insert1(VM.OpCode.DROP, "", to);
+
+                        _InsertPush(i + 1, "save to" + i + 1, to);
+                        _Insert1(VM.OpCode.XSWAP, "", to);
+                        _Insert1(VM.OpCode.DROP, "", to);
+
+                    }
                 }
             }
-
             if (calltype == 1)
             {
                 var c = _Convert1by1(VM.OpCode.CALL, null, to, new byte[] { 5, 0 });
