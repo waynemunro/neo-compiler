@@ -38,7 +38,7 @@ namespace Neo.Compiler
             {
                 var path = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
                 path = System.IO.Path.GetDirectoryName(path);
-                module.LoadJar(System.IO.Path.Combine(path, "AntShares.SmartContract.Framework.jar"));
+                module.LoadJar(System.IO.Path.Combine(path, "org.neo.smartcontract.framework.jar"));
                 module.LoadClass(filename);
                 var conv = new ModuleConverter(log);
 

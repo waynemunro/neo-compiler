@@ -24,7 +24,7 @@ namespace Neo.Compiler.JVM
         {
             string f = System.IO.Path.GetFileName(filename);
             bool bskip = false;
-            if (f == "AntShares.SmartContract.Framework.jar")
+            if (f == "org.neo.smartcontract.framework.jar")
             {
                 bskip = true;
             }

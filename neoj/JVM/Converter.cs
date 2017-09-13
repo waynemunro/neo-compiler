@@ -12,7 +12,7 @@ namespace Neo.Compiler.JVM
 
             var moduleJVMPackage = new JavaModule();
             moduleJVMPackage.LoadClass("go.class");
-            moduleJVMPackage.LoadJar("AntShares.SmartContract.Framework.jar");
+            moduleJVMPackage.LoadJar("org.neo.smartcontract.framework.jar");
 
             var converter = new ModuleConverter(logger);
             //有异常的话在 convert 函数中会直接throw 出来
@@ -87,25 +87,6 @@ namespace Neo.Compiler.JVM
             string mainmethod = "";
             foreach (var key in outModule.mapMethods.Keys)
             {
-                if (key.Contains("Verify"))
-                {
-                    var m = outModule.mapMethods[key];
-                    foreach (var l in this.methodLink)
-                    {
-                        if (l.Value == m)
-                        {
-                            var srcm = l.Key;
-                            if (srcm.DeclaringType.superClass == "AntShares.SmartContract.Framework.VerificationCode" && srcm.returnType == "java.lang.Boolean")
-                            {
-                                logger.Log("找到函数入口点:" + key);
-                                if (mainmethod != "")
-                                    throw new Exception("拥有多个函数入口点，请检查");
-                                mainmethod = key;
-
-                            }
-                        }
-                    }
-                }
                 var name = key.Substring(key.IndexOf("::") + 2);
                 if (name == ("Main"))
                 {
@@ -115,7 +96,7 @@ namespace Neo.Compiler.JVM
                         if (l.Value == m)
                         {
                             var srcm = l.Key;
-                            if (srcm.DeclaringType.superClass == "AntShares.SmartContract.Framework.FunctionCode")
+                            if (srcm.DeclaringType.superClass == "Neo.SmartContract.Framework.SmartContract")
                             {
                                 logger.Log("找到函数入口点:" + key);
                                 if (mainmethod != "")
