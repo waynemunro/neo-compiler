@@ -5,22 +5,22 @@ using System.Text;
 
 namespace Neo.Compiler.JVM
 {
-    public class Converter
-    {
-        public static byte[] Convert(string classfilename, ILogger logger = null)
-        {
+    //public class Converter
+    //{
+    //    public static byte[] Convert(string classfilename, ILogger logger = null)
+    //    {
 
-            var moduleJVMPackage = new JavaModule();
-            moduleJVMPackage.LoadClass("go.class");
-            moduleJVMPackage.LoadJar("org.neo.smartcontract.framework.jar");
+    //        var moduleJVMPackage = new JavaModule();
+    //        moduleJVMPackage.LoadClass("go.class");
+    //        moduleJVMPackage.LoadJar("org.neo.smartcontract.framework.jar");
 
-            var converter = new ModuleConverter(logger);
-            //有异常的话在 convert 函数中会直接throw 出来
-            var antmodule = converter.Convert(moduleJVMPackage);
-            return antmodule.Build();
-        }
+    //        var converter = new ModuleConverter(logger);
+    //        //有异常的话在 convert 函数中会直接throw 出来
+    //        var antmodule = converter.Convert(moduleJVMPackage);
+    //        return antmodule.Build();
+    //    }
 
-    }
+    //}
     class DefLogger : ILogger
     {
         public void Log(string log)
@@ -96,7 +96,7 @@ namespace Neo.Compiler.JVM
                         if (l.Value == m)
                         {
                             var srcm = l.Key;
-                            if (srcm.DeclaringType.superClass == "Neo.SmartContract.Framework.SmartContract")
+                            if (srcm.DeclaringType.superClass == "org.neo.smartcontract.framework.SmartContract")
                             {
                                 logger.Log("找到函数入口点:" + key);
                                 if (mainmethod != "")
@@ -365,12 +365,12 @@ namespace Neo.Compiler.JVM
                 case javaloader.NormalizedByteCode.__astore:
                 case javaloader.NormalizedByteCode.__istore:
                 case javaloader.NormalizedByteCode.__lstore:
-                    _ConvertStLoc(src, to, src.arg1);
+                    _ConvertStLoc(method, src, to, src.arg1);
                     break;
                 case javaloader.NormalizedByteCode.__aload:
                 case javaloader.NormalizedByteCode.__iload:
                 case javaloader.NormalizedByteCode.__lload:
-                    _ConvertLdLoc(src, to, src.arg1);
+                    _ConvertLdLoc(method, src, to, src.arg1);
                     break;
                 case javaloader.NormalizedByteCode.__aaload:
                 case javaloader.NormalizedByteCode.__iaload:
