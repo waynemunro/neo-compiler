@@ -312,7 +312,15 @@ namespace Neo.Compiler.MSIL
                     //}
                     //else
                     {
-                        var addr = addrconv[c.srcaddr];
+                        try
+                        {
+                            var addr = addrconv[c.srcaddr];
+                        }
+                        catch
+                        {
+                            throw new Exception("cannot convert addr in: " + to.name + "\r\n");
+                        }
+
                         Int16 addroff = (Int16)(addr - c.addr);
                         c.bytes = BitConverter.GetBytes(addroff);
                         c.needfix = false;
@@ -799,7 +807,7 @@ namespace Neo.Compiler.MSIL
                             }
                             else
                             {
-                                throw new Exception("not support type Ldsfld");
+                                throw new Exception("not support type Ldsfld\r\n   in: " + to.name + "\r\n");
                             }
                             break;
                         }
@@ -838,10 +846,10 @@ namespace Neo.Compiler.MSIL
                     break;
                 default:
 #if WITHPDB
-                    logger.Log("unsupported instruction " + src.code);
+                    logger.Log("unsupported instruction " + src.code + "\r\n   in: " + to.name + "\r\n");
                     break;
 #else
-                    throw new Exception("unsupported instruction " + src.code);
+                    throw new Exception("unsupported instruction " + src.code + "\r\n   in: " + to.name + "\r\n");
 #endif
             }
 

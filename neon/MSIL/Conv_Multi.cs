@@ -607,7 +607,7 @@ namespace Neo.Compiler.MSIL
             }
 
             if (calltype == 0)
-                throw new Exception("unknown call:" + src.tokenMethod);
+                throw new Exception("unknown call: " + src.tokenMethod + "\r\n   in: " + to.name + "\r\n");
             var md = src.tokenUnknown as Mono.Cecil.MethodReference;
             var pcount = md.Parameters.Count;
 
