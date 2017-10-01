@@ -282,8 +282,10 @@ namespace Neo.Compiler.JVM
                     //_Convert1by1(VM.OpCode.DEC, src, to);
                     return 0;
                 }
+                // todo: what about java.lang.String::contentEquals?
                 else if (name == "java.math.BigInteger::equals" ||
-                    name == "java.lang.String::equals")
+                    name == "java.lang.String::equals" ||
+                    name == "kotlin.jvm.internal.Intrinsics::areEqual")
                 {
                     _Convert1by1(VM.OpCode.NUMEQUAL, src, to);
                     //_Convert1by1(VM.OpCode.DEC, src, to);
