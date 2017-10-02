@@ -331,7 +331,8 @@ namespace Neo.Compiler.JVM
                 {
                     return _ConvertStringBuilder(c.Name, null, to);
                 }
-                else if (name == "java.util.Arrays::equals")
+                else if (name == "java.util.Arrays::equals"||
+                    name== "kotlin.jvm.internal.Intrinsics::areEqual")
                 {
                     _Convert1by1(VM.OpCode.EQUAL, null, to);
                     return 0;
