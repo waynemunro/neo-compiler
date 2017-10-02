@@ -288,7 +288,7 @@ namespace Neo.Compiler.JVM
                 case javaloader.NormalizedByteCode.__dreturn:
                 case javaloader.NormalizedByteCode.__areturn:
                     //        //return 在外面特殊处理了
-                    _Insert1(VM.OpCode.RET, null, to);
+                    _Convert1by1(VM.OpCode.RET, src, to);
                     break;
 
                 case javaloader.NormalizedByteCode.__pop:
