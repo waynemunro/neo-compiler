@@ -129,7 +129,7 @@ namespace Neo.Compiler.JVM
         private void _insertBeginCode(JavaMethod from, AntsMethod to)
         {
             //压入槽位栈
-            _InsertPush(from.MaxVariableIndex, "begincode", to);
+            _InsertPush(from.MaxVariableIndex + 1, "begincode", to);
             _Insert1(VM.OpCode.NEWARRAY, "", to);
             _Insert1(VM.OpCode.TOALTSTACK, "", to);
 
