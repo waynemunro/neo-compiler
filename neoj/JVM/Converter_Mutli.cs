@@ -297,12 +297,16 @@ namespace Neo.Compiler.JVM
                     name == "java.lang.Character::valueOf" ||
                     name == "java.lang.String::valueOf" ||
                     name == "java.lang.Long::valueOf" ||
+                    name == "java.lang.Integer::valueOf" ||
                     name == "java.math.BigInteger::toByteArray")
                 {
                     //donothing
                     return 0;
                 }
-                else if (name == "java.lang.Boolean::booleanValue")
+                else if (name == "java.lang.Boolean::booleanValue"||
+                    name == "java.lang.Integer::integerValue" ||
+                    name == "java.lang.Long::longValue"||
+                    name == "java.math.BigInteger::longValue")
                 {
                     _Convert1by1(VM.OpCode.NOP, src, to);
                     return 0;
