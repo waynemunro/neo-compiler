@@ -396,7 +396,7 @@ namespace Neo.Compiler.JVM
             this.arg1 = ins.Arg1;
             this.arg2 = ins.Arg2;
             this.addr = ins.PC;
-            if (method.method.LineNumberTableAttribute.TryGetValue(this.addr, out this.debugline) == false)
+            if (method.method.LineNumberTableAttribute==null||method.method.LineNumberTableAttribute.TryGetValue(this.addr, out this.debugline) == false)
             {
                 this.debugline = -1;
             }
