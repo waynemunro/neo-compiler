@@ -294,6 +294,10 @@ namespace Neo.Compiler.JVM
                 case javaloader.NormalizedByteCode.__pop:
                     _Convert1by1(VM.OpCode.DROP, src, to);
                     break;
+                case javaloader.NormalizedByteCode.__pop2://pop2 这个指令有些鬼
+                    _Convert1by1(VM.OpCode.DROP, src, to);
+                    break;
+
                 case javaloader.NormalizedByteCode.__getstatic:
                     {
                         _Convert1by1(VM.OpCode.NOP, src, to);
@@ -357,6 +361,11 @@ namespace Neo.Compiler.JVM
                 case javaloader.NormalizedByteCode.__lconst_0:
                     _ConvertPush(0, src, to);
                     break;
+
+                case javaloader.NormalizedByteCode.__aconst_null:
+                    _ConvertPush(0, src, to);
+                    break;
+
                 case javaloader.NormalizedByteCode.__newarray:
                 case javaloader.NormalizedByteCode.__anewarray:
                     skipcount = _ConvertNewArray(method, src, to);
