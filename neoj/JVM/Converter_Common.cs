@@ -133,10 +133,10 @@ namespace Neo.Compiler.JVM
             _Insert1(VM.OpCode.NEWARRAY, "", to);
             _Insert1(VM.OpCode.TOALTSTACK, "", to);
 
-            for(var i=0;i<from.paramTypes.Count;i++)
+            for (var i = 0; i < from.paramTypes.Count; i++)
             {
                 int pos = 0;
-                if(from.method.IsStatic)
+                if (from.method.IsStatic)
                 {
                     pos = from.argTable[i];
                 }

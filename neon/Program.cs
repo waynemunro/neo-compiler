@@ -1,6 +1,7 @@
 ﻿using Neo.Compiler.MSIL;
 using System;
 using System.Reflection;
+using System.Text;
 
 namespace Neo.Compiler
 {
@@ -61,6 +62,7 @@ namespace Neo.Compiler
             }
             byte[] bytes = null;
             bool bSucc = false;
+            string jsonstr = null;
             //convert and build
             try
             {
@@ -69,6 +71,21 @@ namespace Neo.Compiler
                 AntsModule am = conv.Convert(mod);
                 bytes = am.Build();
                 log.Log("convert succ");
+
+
+                try
+                {
+                    var outjson = vmtool.FuncExport.Export(am);
+                    StringBuilder sb = new StringBuilder();
+                    outjson.ConvertToStringWithFormat(sb, 0);
+                    jsonstr = sb.ToString();
+                    log.Log("gen abi succ");
+                }
+                catch (Exception err)
+                {
+                    log.Log("gen abi Error:" + err.ToString());
+                }
+
             }
             catch (Exception err)
             {
@@ -89,6 +106,21 @@ namespace Neo.Compiler
             catch (Exception err)
             {
                 log.Log("Write Bytes Error:" + err.ToString());
+                return;
+            }
+            try
+            {
+
+                string abiname = onlyname + ".abi.json";
+
+                System.IO.File.Delete(abiname);
+                System.IO.File.WriteAllText(abiname, jsonstr);
+                log.Log("write:" + abiname);
+                bSucc = true;
+            }
+            catch (Exception err)
+            {
+                log.Log("Write abi Error:" + err.ToString());
                 return;
             }
             try

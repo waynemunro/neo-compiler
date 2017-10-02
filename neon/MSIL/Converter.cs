@@ -6,23 +6,23 @@ using System.Text;
 namespace Neo.Compiler.MSIL
 {
 
-    public class Converter
-    {
-        public static byte[] Convert(System.IO.Stream dllstream, ILogger logger = null)
-        {
-            var module = new ILModule();
-            module.LoadModule(dllstream, null);
-            if (logger == null)
-            {
-                logger = new DefLogger();
-            }
-            var converter = new ModuleConverter(logger);
-            //有异常的话在 convert 函数中会直接throw 出来
-            var antmodule = converter.Convert(module);
-            return antmodule.Build();
-        }
+    //public class Converter
+    //{
+    //    public static byte[] Convert(System.IO.Stream dllstream, ILogger logger = null)
+    //    {
+    //        var module = new ILModule();
+    //        module.LoadModule(dllstream, null);
+    //        if (logger == null)
+    //        {
+    //            logger = new DefLogger();
+    //        }
+    //        var converter = new ModuleConverter(logger);
+    //        //有异常的话在 convert 函数中会直接throw 出来
+    //        var antmodule = converter.Convert(module);
+    //        return antmodule.Build();
+    //    }
 
-    }
+    //}
     class DefLogger : ILogger
     {
         public void Log(string log)
@@ -61,7 +61,8 @@ namespace Neo.Compiler.MSIL
                 foreach (var m in t.Value.methods)
                 {
                     if (m.Value.method == null) continue;
-                    if (m.Value.method.IsAddOn || m.Value.method.IsRemoveOn) continue;//event 自动生成的代码，不要
+                    if (m.Value.method.IsAddOn || m.Value.method.IsRemoveOn)
+                        continue;//event 自动生成的代码，不要
                     AntsMethod nm = new AntsMethod();
                     if (m.Key == ".cctor")
                     {
@@ -92,12 +93,30 @@ namespace Neo.Compiler.MSIL
                     {
                         continue;
                     }
-                    if (m.Value.method.IsAddOn || m.Value.method.IsRemoveOn) continue;//event 自动生成的代码，不要
+                    if (m.Value.method.IsAddOn || m.Value.method.IsRemoveOn)
+                        continue;//event 自动生成的代码，不要
 
                     var nm = this.methodLink[m.Value];
 
                     //try
                     {
+                        nm.returntype = m.Value.returntype;
+                        foreach (var src in m.Value.paramtypes)
+                        {
+                            nm.paramtypes.Add(new AntsParam(src.name, src.type));
+                        }
+
+                        byte[] outcall;string name;
+                        if (IsAppCall(m.Value.method, out outcall))
+                            continue;
+                        if (IsNonCall(m.Value.method))
+                            continue;
+                        if (IsOpCall(m.Value.method, out name))
+                            continue;
+                        if (IsSysCall(m.Value.method, out name))
+                            continue;
+
+
                         this.ConvertMethod(m.Value, nm);
                     }
                     //catch (Exception err)
@@ -198,11 +217,6 @@ namespace Neo.Compiler.MSIL
 
         private void ConvertMethod(ILMethod from, AntsMethod to)
         {
-            to.returntype = from.returntype;
-            foreach (var src in from.paramtypes)
-            {
-                to.paramtypes.Add(new AntsParam(src.name, src.type));
-            }
 
 
             this.addr = 0;
@@ -350,7 +364,7 @@ namespace Neo.Compiler.MSIL
 
                 case CodeEx.Ldc_I4:
                 case CodeEx.Ldc_I4_S:
-                    skipcount= _ConvertPushI4WithConv(method, src.tokenI32, src, to);
+                    skipcount = _ConvertPushI4WithConv(method, src.tokenI32, src, to);
                     break;
                 case CodeEx.Ldc_I4_0:
                     _ConvertPush(0, src, to);
@@ -380,7 +394,7 @@ namespace Neo.Compiler.MSIL
                     _ConvertPush(8, src, to);
                     break;
                 case CodeEx.Ldc_I4_M1:
-                    skipcount = _ConvertPushI4WithConv(method ,- 1, src, to);
+                    skipcount = _ConvertPushI4WithConv(method, -1, src, to);
                     break;
                 case CodeEx.Ldc_I8:
                     skipcount = _ConvertPushI8WithConv(method, src.tokenI64, src, to);
