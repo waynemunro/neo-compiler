@@ -462,7 +462,39 @@ namespace Neo.Compiler.JVM
             {
                 int n = method.GetNextCodeAddr(next.addr);
                 next = method.body_Codes[n];
-                if (next.code == javaloader.NormalizedByteCode.__dup)
+                if(next.code== javaloader.NormalizedByteCode.__invokestatic)
+                {
+                    var i =                    method.DeclaringType.classfile.constantpool[next.arg1] as javaloader.ClassFile.ConstantPoolItemMethodref;
+                    var callname = i.Class + "::" + i.Name;
+                    if(callname== "java.lang.Integer::valueOf")
+                    {
+                        //nothing
+                        skipcount++;
+                    }
+                    else
+                    {
+                        throw new Exception("can not parse this new array code chain."+next.code);
+                    }
+                }
+                else if(next.code== javaloader.NormalizedByteCode.__invokevirtual)
+                {
+                    var i = method.DeclaringType.classfile.constantpool[next.arg1] as javaloader.ClassFile.ConstantPoolItemMethodref;
+                    var callname = i.Class + "::" + i.Name;
+                    if(callname== "java.lang.Byte::byteValue")
+                    {
+                        skipcount++;
+                    }
+                    else
+                    {
+                        throw new Exception("can not parse this new array code chain." + next.code);
+                    }
+                }
+                else if(next.code== javaloader.NormalizedByteCode.__checkcast)
+                {
+                    //nothing
+                    skipcount++;
+                }
+                else if (next.code == javaloader.NormalizedByteCode.__dup)
                 {
                     dupcount++;
                     skipcount++;
