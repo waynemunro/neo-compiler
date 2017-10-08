@@ -343,6 +343,11 @@ namespace Neo.Compiler.JVM
                     _Convert1by1(VM.OpCode.DROP, null, to);
                     return 0;
                 }
+                else if(name== "kotlin.jvm.internal.Intrinsics::throwNpe")
+                {
+                    _Convert1by1(VM.OpCode.THROW, src, to);
+                    return 0;
+                }
             }
 
             if (calltype == 0)
