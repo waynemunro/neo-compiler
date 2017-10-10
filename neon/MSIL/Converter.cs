@@ -106,7 +106,7 @@ namespace Neo.Compiler.MSIL
                             nm.paramtypes.Add(new AntsParam(src.name, src.type));
                         }
 
-                        byte[] outcall;string name;
+                        byte[] outcall; string name;
                         if (IsAppCall(m.Value.method, out outcall))
                             continue;
                         if (IsNonCall(m.Value.method))
@@ -311,34 +311,21 @@ namespace Neo.Compiler.MSIL
 
                     )
                 {
-                    //need neo.vm update.
-                    //if (c.code == VM.OpCode.SWITCH)
-                    //{
-                    //    for (var i = 0; i < c.srcaddrswitch.Length; i++)
-                    //    {
-                    //        var addr = addrconv[c.srcaddrswitch[i]];
-                    //        Int16 addroff = (Int16)(addr - c.addr);
-                    //        var bs = BitConverter.GetBytes(addroff);
-                    //        c.bytes[i * 2 + 2] = bs[0];
-                    //        c.bytes[i * 2 + 2 + 1] = bs[1];
-                    //        c.needfix = false;
-                    //    }
-                    //}
-                    //else
-                    {
-                        try
-                        {
-                            var addr = addrconv[c.srcaddr];
-                        }
-                        catch
-                        {
-                            throw new Exception("cannot convert addr in: " + to.name + "\r\n");
-                        }
 
-                        Int16 addroff = (Int16)(addr - c.addr);
+                    try
+                    {
+                        var _addr = addrconv[c.srcaddr];
+                        Int16 addroff = (Int16)(_addr - c.addr);
                         c.bytes = BitConverter.GetBytes(addroff);
                         c.needfix = false;
                     }
+                    catch
+                    {
+                        throw new Exception("cannot convert addr in: " + to.name + "\r\n");
+                    }
+
+
+
                 }
             }
         }
