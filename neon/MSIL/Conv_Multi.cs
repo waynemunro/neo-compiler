@@ -610,13 +610,18 @@ namespace Neo.Compiler.MSIL
                 throw new Exception("unknown call: " + src.tokenMethod + "\r\n   in: " + to.name + "\r\n");
             var md = src.tokenUnknown as Mono.Cecil.MethodReference;
             var pcount = md.Parameters.Count;
-
+            bool havethis = md.HasThis;
             if(calltype==2)
             {
                 //opcode call 
             }
             else
             {//翻转参数顺序
+
+                //如果是syscall 并且有this的，翻转范围加一
+                if (calltype == 3 && havethis)
+                    pcount++;
+
                 _Convert1by1(VM.OpCode.NOP, src, to);
                 if (pcount <= 1)
                 {
