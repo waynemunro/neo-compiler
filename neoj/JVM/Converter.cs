@@ -166,11 +166,12 @@ namespace Neo.Compiler.JVM
 
             foreach (var c in this.outModule.total_Codes.Values)
             {
-                if (c.needfix)
+                if (c.needfixfunc)
                 {//需要地址转换
                     var addrfunc = this.outModule.mapMethods[c.srcfunc].funcaddr;
                     Int16 addrconv = (Int16)(addrfunc - c.addr);
                     c.bytes = BitConverter.GetBytes(addrconv);
+                    c.needfixfunc = false;
                 }
             }
         }
@@ -257,11 +258,7 @@ namespace Neo.Compiler.JVM
         {
             foreach (var c in to.body_Codes.Values)
             {
-                if (c.needfix &&
-
-                    c.code != VM.OpCode.CALL //call 要做函数间的转换
-
-                    )
+                if (c.needfix)
                 {
 
                     var addr = addrconv[c.srcaddr];

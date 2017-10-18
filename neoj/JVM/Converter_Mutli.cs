@@ -402,7 +402,7 @@ namespace Neo.Compiler.JVM
             if (calltype == 1)
             {
                 var _c = _Convert1by1(VM.OpCode.CALL, null, to, new byte[] { 5, 0 });
-                _c.needfix = true;
+                _c.needfixfunc = true;
                 _c.srcfunc = name;
                 return 0;
             }
