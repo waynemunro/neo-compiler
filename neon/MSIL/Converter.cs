@@ -72,10 +72,34 @@ namespace Neo.Compiler.MSIL
                     if (m.Value.method.IsConstructor) continue;
                     nm._namespace = m.Value.method.DeclaringType.FullName;
                     nm.name = m.Value.method.FullName;
+                    nm.displayName = m.Value.method.Name;
+
+                    Mono.Collections.Generic.Collection<Mono.Cecil.CustomAttribute> ca = m.Value.method.CustomAttributes;
+                    foreach (var attr in ca)
+                    {
+                        if (attr.AttributeType.Name == "DisplayNameAttribute")
+                        {
+                            nm.displayName = (string)attr.ConstructorArguments[0].Value;
+                        }
+                    }
+
                     nm.isPublic = m.Value.method.IsPublic;
                     this.methodLink[m.Value] = nm;
                     outModule.mapMethods[nm.name] = nm;
 
+                }
+                foreach (var e in t.Value.fields)
+                {
+                    if (e.Value.isEvent)
+                    {
+                        AntsEvent ae = new AntsEvent();
+                        ae._namespace = e.Value.field.DeclaringType.FullName;
+                        ae.name = ae._namespace + "::" + e.Key;
+                        ae.displayName = e.Value.displayName;
+                        ae.returntype = e.Value.returntype;
+                        ae.paramtypes = e.Value.paramtypes;
+                        outModule.mapEvents[ae.name] = ae;
+                    }
                 }
             }
 
@@ -192,8 +216,9 @@ namespace Neo.Compiler.MSIL
 
             AntsMethod main = new AntsMethod();
             main.name = "System.Void @JmpMain()";
+            main.displayName = "Main";
             main.isPublic = true;
-            main.returntype = "void";
+            main.returntype = "System.Void";
 
 
             var bytes = Encoding.UTF8.GetBytes("Neo.Runtime.GetTrigger");
@@ -204,19 +229,19 @@ namespace Neo.Compiler.MSIL
 
             this.addr = 0;
             this.addrconv.Clear();
-            
+
             _Convert1by1(VM.OpCode.SYSCALL, null, main, outbytes);
             //_Convert1by1(VM.OpCode.TOALTSTACK, null, main);
 
             //for
-               //ifjmp
-               //ifjmp
-               //throw
+            //ifjmp
+            //ifjmp
+            //throw
             //for
-               //jmp
-               //jmp
-               //jmp
-            foreach(var key in entries.Keys)
+            //jmp
+            //jmp
+            //jmp
+            foreach (var key in entries.Keys)
             {
                 _Convert1by1(VM.OpCode.DUP, null, main);
                 _ConvertPush(key, null, main);
@@ -228,11 +253,11 @@ namespace Neo.Compiler.MSIL
             _Convert1by1(VM.OpCode.THROW, null, main);
             foreach (var key in entries.Keys)
             {
-                var callbegin=_Convert1by1(VM.OpCode.DROP, null, main);
+                var callbegin = _Convert1by1(VM.OpCode.DROP, null, main);
                 this.addrconv[key] = callbegin.addr;
 
                 var name = entries[key];
-                var jmp= _Convert1by1(VM.OpCode.JMP, null, main,new byte[2]);
+                var jmp = _Convert1by1(VM.OpCode.JMP, null, main, new byte[2]);
                 jmp.needfixfunc = true;
                 jmp.srcfunc = name;
             }

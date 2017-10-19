@@ -24,6 +24,10 @@
     <DebugSymbols>False</DebugSymbols>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AntShares.MonoCecil" Version="1.0.0" />
     <PackageReference Include="Neo.VM" Version="2.0.3" />

@@ -63,17 +63,34 @@ namespace vmtool
 
             return "Unknown:" + _type;
         }
-        public static MyJson.JsonNode_Object Export(AntsModule module)
+        public static MyJson.JsonNode_Object Export(AntsModule module,byte[] script)
         {
-            var outjson = new MyJson.JsonNode_Object();
-            outjson.SetDictValue("hash", "hash");
-            outjson.SetDictValue("entrypoint", "Main");
+            var sha256 = System.Security.Cryptography.SHA256.Create();
+            byte[] hash256 = sha256.ComputeHash(script);
+            var ripemd160 = new Neo.Cryptography.RIPEMD160Managed();
+            var hash = ripemd160.ComputeHash(hash256);
 
+            var outjson = new MyJson.JsonNode_Object();
+
+            //hash
+            StringBuilder sb = new StringBuilder();
+            foreach (var b in hash)
+            {
+                sb.Append(b.ToString("X02"));
+            }
+            outjson.SetDictValue("hash", sb.ToString());
+
+            //entrypoint
+            outjson.SetDictValue("entrypoint", "Main");
+            if (module.mapMethods.ContainsKey("Main"))
+            {
+                var name = module.mapMethods["Main"].displayName;
+                outjson.SetDictValue("entrypoint", name);
+            }
+            //functions
             var funcsigns = new MyJson.JsonNode_Array();
             outjson["functions"] = funcsigns;
-            var eventsigns = new MyJson.JsonNode_Array();
-            outjson["events"] = eventsigns;
-
+         
             foreach (var function in module.mapMethods)
             {
                 var mm = function.Value;
@@ -89,7 +106,7 @@ namespace vmtool
                     var sps = funcname.Split(new string[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
                     funcname = sps.Last();
                 }
-                funcsign.SetDictValue("name", funcname);
+                funcsign.SetDictValue("name", function.Value.displayName);
                 var rtype = ConvType(mm.returntype);
                 funcsign.SetDictValue("returntype", rtype);
                 MyJson.JsonNode_Array funcparams = new MyJson.JsonNode_Array();
@@ -107,6 +124,38 @@ namespace vmtool
                     }
                 }
             }
+
+            //events
+            var eventsigns = new MyJson.JsonNode_Array();
+            outjson["events"] = eventsigns;
+            foreach (var events in module.mapEvents)
+            {
+                var mm = events.Value;
+
+                var ps = mm.name.Split(new char[] { ' ', '(' }, StringSplitOptions.RemoveEmptyEntries);
+                var funcsign = new MyJson.JsonNode_Object();
+
+                eventsigns.Add(funcsign);
+
+                funcsign.SetDictValue("name", events.Value.displayName);
+                var rtype = ConvType(mm.returntype);
+                funcsign.SetDictValue("returntype", rtype);
+                MyJson.JsonNode_Array funcparams = new MyJson.JsonNode_Array();
+                funcsign["paramaters"] = funcparams;
+                if (mm.paramtypes != null)
+                {
+                    foreach (var v in mm.paramtypes)
+                    {
+                        var ptype = ConvType(v.type);
+                        var item = new MyJson.JsonNode_Object();
+                        funcparams.Add(item);
+
+                        item.SetDictValue("name", v.name);
+                        item.SetDictValue("type", ptype);
+                    }
+                }
+            }
+
             return outjson;
         }
     }
