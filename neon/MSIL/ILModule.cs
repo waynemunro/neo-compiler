@@ -120,7 +120,7 @@ namespace Neo.Compiler.MSIL
                         }
                         catch
                         {
-                            throw new Exception("这个event type不能解析:"+field.FieldType.FullName+".这很可能是System.Action<xxx>,这需要从mscorlib.dll中读取信息，把他copy过来，或者自己定义delegate");
+                            throw new Exception("can't parese event type from:" + field.FieldType.FullName + ".maybe it is System.Action<xxx> which is defined in mscorlib.dll，copy this dll in.");
                         }
                     }
                     if (eventtype != null)
@@ -132,7 +132,7 @@ namespace Neo.Compiler.MSIL
                                 this.returntype = m.ReturnType.FullName;
                                 foreach (var src in m.Parameters)
                                 {
-                                    this.paramtypes.Add(new AntsParam(src.Name, src.ParameterType.FullName));
+                                    this.paramtypes.Add(new NeoParam(src.Name, src.ParameterType.FullName));
                                 }
                             }
                         }
@@ -146,7 +146,7 @@ namespace Neo.Compiler.MSIL
         public string name;
         public string displayName;
         public string returntype;
-        public List<AntsParam> paramtypes = new List<AntsParam>();
+        public List<NeoParam> paramtypes = new List<NeoParam>();
         public override string ToString()
         {
             return type;
@@ -167,7 +167,7 @@ namespace Neo.Compiler.MSIL
                     hasParam = true;
                     foreach (var p in method.Parameters)
                     {
-                        this.paramtypes.Add(new AntsParam(p.Name, p.ParameterType.FullName));
+                        this.paramtypes.Add(new NeoParam(p.Name, p.ParameterType.FullName));
                     }
                 }
                 if (method.HasBody)
@@ -177,7 +177,7 @@ namespace Neo.Compiler.MSIL
                     {
                         foreach (var v in bodyNative.Variables)
                         {
-                            this.body_Variables.Add(new AntsParam(v.Name, v.VariableType.FullName));
+                            this.body_Variables.Add(new NeoParam(v.Name, v.VariableType.FullName));
                         }
                     }
                     for (int i = 0; i < bodyNative.Instructions.Count; i++)
@@ -199,10 +199,10 @@ namespace Neo.Compiler.MSIL
         }
 
         public string returntype;
-        public List<AntsParam> paramtypes = new List<AntsParam>();
+        public List<NeoParam> paramtypes = new List<NeoParam>();
         public bool hasParam = false;
         public Mono.Cecil.MethodDefinition method;
-        public List<AntsParam> body_Variables = new List<AntsParam>();
+        public List<NeoParam> body_Variables = new List<NeoParam>();
         public SortedDictionary<int, OpCode> body_Codes = new SortedDictionary<int, OpCode>();
         public string fail = null;
         public int GetNextCodeAddr(int srcaddr)

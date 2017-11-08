@@ -42,13 +42,13 @@ namespace Neo.Compiler.JVM
 
         ILogger logger;
         JavaModule srcModule;
-        public AntsModule outModule;
-        public Dictionary<JavaMethod, AntsMethod> methodLink = new Dictionary<JavaMethod, AntsMethod>();
-        public AntsModule Convert(JavaModule _in)
+        public NeoModule outModule;
+        public Dictionary<JavaMethod, NeoMethod> methodLink = new Dictionary<JavaMethod, NeoMethod>();
+        public NeoModule Convert(JavaModule _in)
         {
             this.srcModule = _in;
             //logger.Log("beginConvert.");
-            this.outModule = new AntsModule(this.logger);
+            this.outModule = new NeoModule(this.logger);
             foreach (var c in _in.classes.Values)
             {
                 if (c.skip) continue;
@@ -56,7 +56,7 @@ namespace Neo.Compiler.JVM
                 {
                     if (m.Value.skip) continue;
                     if (m.Key[0] == '<') continue;//系統函數不要
-                    AntsMethod nm = new AntsMethod();
+                    NeoMethod nm = new NeoMethod();
                     nm.name = c.classfile.Name + "::" + m.Key;
                     nm.displayName = m.Key;
                     nm.isPublic = m.Value.method.IsPublic;
@@ -99,9 +99,9 @@ namespace Neo.Compiler.JVM
                             var srcm = l.Key;
                             if (srcm.DeclaringType.superClass == "org.neo.smartcontract.framework.SmartContract")
                             {
-                                logger.Log("找到函数入口点:" + key);
+                                logger.Log("Find entrypoint:" + key);
                                 if (mainmethod != "")
-                                    throw new Exception("拥有多个函数入口点，请检查");
+                                    throw new Exception("Have too mush EntryPoint,Check it.");
                                 mainmethod = key;
 
                             }
@@ -111,7 +111,7 @@ namespace Neo.Compiler.JVM
             }
             if (mainmethod == "")
             {
-                throw new Exception("找不到入口函数，请检查");
+                throw new Exception("Can't find Main Method from SmartContract,Check it.");
 
             }
             outModule.mainMethod = mainmethod;
@@ -129,7 +129,7 @@ namespace Neo.Compiler.JVM
         {
             if (this.outModule.mapMethods.ContainsKey(main) == false)
             {
-                throw new Exception("找不到名为" + main + "的入口");
+                throw new Exception("can't find Entrypoint:" + main);
             }
             var first = this.outModule.mapMethods[main];
             first.funcaddr = 0;
@@ -176,13 +176,13 @@ namespace Neo.Compiler.JVM
                 }
             }
         }
-        private void ConvertMethod(JavaMethod from, AntsMethod to)
+        private void ConvertMethod(JavaMethod from, NeoMethod to)
         {
             convertType.Clear();
             to.returntype = from.returnType;
             for (var i = 0; i < from.paramTypes.Count; i++)
             {
-                to.paramtypes.Add(new AntsParam("_" + i, from.paramTypes[i]));
+                to.paramtypes.Add(new NeoParam("_" + i, from.paramTypes[i]));
             }
 
 
@@ -222,7 +222,7 @@ namespace Neo.Compiler.JVM
         int addr = 0;
 
 
-        static int getNumber(AntsCode code)
+        static int getNumber(NeoCode code)
         {
             if (code.code <= VM.OpCode.PUSHBYTES75 && code.code >= VM.OpCode.PUSHBYTES1)
                 return (int)new BigInteger(code.bytes);
@@ -255,7 +255,7 @@ namespace Neo.Compiler.JVM
             var n = BitConverter.ToInt32(target, 0);
             return n;
         }
-        private void ConvertAddrInMethod(AntsMethod to)
+        private void ConvertAddrInMethod(NeoMethod to)
         {
             foreach (var c in to.body_Codes.Values)
             {
@@ -271,7 +271,7 @@ namespace Neo.Compiler.JVM
             }
         }
 
-        private int ConvertCode(JavaMethod method, OpCode src, AntsMethod to)
+        private int ConvertCode(JavaMethod method, OpCode src, NeoMethod to)
         {
             int skipcount = 0;
             switch (src.code)
@@ -612,7 +612,7 @@ namespace Neo.Compiler.JVM
                         //ifnonnull 跳过 一个throw，isnon 就 throw
                         //Neo.VM实际上没有null这个类型，要识别出这个套路，编译出更合理的代码
                         skipcount = _ConvertIfNonNull(method, src, to);
- 
+
                     }
                     break;
                 //    //Stack

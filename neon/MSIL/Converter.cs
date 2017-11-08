@@ -46,12 +46,12 @@ namespace Neo.Compiler.MSIL
         }
 
         ILogger logger;
-        public AntsModule outModule;
-        public Dictionary<ILMethod, AntsMethod> methodLink = new Dictionary<ILMethod, AntsMethod>();
-        public AntsModule Convert(ILModule _in)
+        public NeoModule outModule;
+        public Dictionary<ILMethod, NeoMethod> methodLink = new Dictionary<ILMethod, NeoMethod>();
+        public NeoModule Convert(ILModule _in)
         {
             //logger.Log("beginConvert.");
-            this.outModule = new AntsModule(this.logger);
+            this.outModule = new NeoModule(this.logger);
             foreach (var t in _in.mapType)
             {
                 if (t.Key[0] == '<') continue;//系统的，不要
@@ -63,7 +63,7 @@ namespace Neo.Compiler.MSIL
                     if (m.Value.method == null) continue;
                     if (m.Value.method.IsAddOn || m.Value.method.IsRemoveOn)
                         continue;//event 自动生成的代码，不要
-                    AntsMethod nm = new AntsMethod();
+                    NeoMethod nm = new NeoMethod();
                     if (m.Key == ".cctor")
                     {
                         CctorSubVM.Parse(m.Value, this.outModule);
@@ -92,7 +92,7 @@ namespace Neo.Compiler.MSIL
                 {
                     if (e.Value.isEvent)
                     {
-                        AntsEvent ae = new AntsEvent();
+                        NeoEvent ae = new NeoEvent();
                         ae._namespace = e.Value.field.DeclaringType.FullName;
                         ae.name = ae._namespace + "::" + e.Key;
                         ae.displayName = e.Value.displayName;
@@ -136,7 +136,7 @@ namespace Neo.Compiler.MSIL
                         nm.returntype = m.Value.returntype;
                         foreach (var src in m.Value.paramtypes)
                         {
-                            nm.paramtypes.Add(new AntsParam(src.name, src.type));
+                            nm.paramtypes.Add(new NeoParam(src.name, src.type));
                         }
 
                         byte[] outcall; string name;
@@ -165,7 +165,7 @@ namespace Neo.Compiler.MSIL
 
                 if (key.Contains("::Main("))
                 {
-                    AntsMethod m = outModule.mapMethods[key];
+                    NeoMethod m = outModule.mapMethods[key];
 
                     foreach (var l in this.methodLink)
                     {
@@ -186,11 +186,11 @@ namespace Neo.Compiler.MSIL
             }
             if (mainmethod == "" && spmains.Count == 0)
             {
-                throw new Exception("找不到入口函数，请检查");
+                throw new Exception("Can't find EntryPoint,Check it.");
             }
             else if (mainmethod != "" && spmains.Count > 0)
             {
-                throw new Exception("同时拥有指定入口函数和默认入口函数，请检查");
+                throw new Exception("Have Main Method and Spec EntryPoint sametime,Check it.");
             }
             else if (mainmethod != "")
             {
@@ -214,7 +214,7 @@ namespace Neo.Compiler.MSIL
         private string CreateJmpMain(Dictionary<byte, string> entries)
         {
 
-            AntsMethod main = new AntsMethod();
+            NeoMethod main = new NeoMethod();
             main.name = "System.Void @JmpMain()";
             main.displayName = "Main";
             main.isPublic = true;
@@ -271,7 +271,7 @@ namespace Neo.Compiler.MSIL
         {
             if (this.outModule.mapMethods.ContainsKey(main) == false)
             {
-                throw new Exception("找不到名为" + main + "的入口");
+                throw new Exception("Can't find entrypoint:" + main);
             }
             var first = this.outModule.mapMethods[main];
             first.funcaddr = 0;
@@ -319,7 +319,7 @@ namespace Neo.Compiler.MSIL
             }
         }
 
-        private void ConvertMethod(ILMethod from, AntsMethod to)
+        private void ConvertMethod(ILMethod from, NeoMethod to)
         {
 
 
@@ -372,7 +372,7 @@ namespace Neo.Compiler.MSIL
         //    }
         //    return "";
         //}
-        static int getNumber(AntsCode code)
+        static int getNumber(NeoCode code)
         {
             if (code.code <= VM.OpCode.PUSHBYTES75 && code.code >= VM.OpCode.PUSHBYTES1)
                 return (int)new BigInteger(code.bytes);
@@ -405,7 +405,7 @@ namespace Neo.Compiler.MSIL
             var n = BitConverter.ToInt32(target, 0);
             return n;
         }
-        private void ConvertAddrInMethod(AntsMethod to)
+        private void ConvertAddrInMethod(NeoMethod to)
         {
             foreach (var c in to.body_Codes.Values)
             {
@@ -429,7 +429,7 @@ namespace Neo.Compiler.MSIL
                 }
             }
         }
-        private int ConvertCode(ILMethod method, OpCode src, AntsMethod to)
+        private int ConvertCode(ILMethod method, OpCode src, NeoMethod to)
         {
             int skipcount = 0;
             switch (src.code)
