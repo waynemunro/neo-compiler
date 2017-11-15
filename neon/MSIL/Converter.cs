@@ -128,7 +128,7 @@ namespace Neo.Compiler.MSIL
                     if (IsEntryCall(m.Value.method, out entryid))
                     {
                         spmains[entryid] = nm.name;
-                        logger.Log("找到函数入口点:[" + entryid + "]" + nm.name);
+                        logger.Log("Find entrypoint:[" + entryid + "]" + nm.name);
                     }
 
                     //try
@@ -176,7 +176,7 @@ namespace Neo.Compiler.MSIL
                             {
 
                                 if (mainmethod != "")
-                                    throw new Exception("拥有多个函数入口点，请检查");
+                                    throw new Exception("Have too mush EntryPoint,Check it.");
                                 mainmethod = key;
 
                             }
@@ -195,7 +195,7 @@ namespace Neo.Compiler.MSIL
             else if (mainmethod != "")
             {
                 //单一默认入口
-                logger.Log("找到函数入口点:" + mainmethod);
+                logger.Log("Find entrypoint:" + mainmethod);
             }
             else if (spmains.Count > 0) //拥有条件入口的情况
             {

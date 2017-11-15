@@ -83,6 +83,10 @@ namespace Neo.Compiler.MSIL
                 else
                 {
                     var method = new ILMethod(this, m);
+                    if (methods.ContainsKey(m.Name))
+                    {
+                        throw new Exception("already have a func named:" + type.FullName + "::" + m.Name);
+                    }
                     methods[m.Name] = method;
                 }
             }

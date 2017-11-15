@@ -78,23 +78,51 @@ namespace Neo.Compiler.JVM
             {
                 this.fields.Add(f.Name, f.Signature);
             }
+            bool isKtObj = false;
+            if (this.classfile.SourceFileAttribute.Contains(".kt"))
+            {
+                var sign = "L" + this.classfile.Name + ";";
+                foreach (var f in this.classfile.Fields)
+                {
+                    if (f.Name == "INSTANCE"&&f.IsStatic&&f.Signature==sign)
+                    {
+                        isKtObj = true;
+                        break;
+                    }
+                }
+            }
             foreach (var m in this.classfile.Methods)
             {
+
                 bool bskip = false;
+                if (m.IsStatic == false&& isKtObj==false)
+                {
+                    bskip = true;
+                    //静态成员不要，除非是kotlin 的 object 对象，相当于静态
+
+                }
+
                 if (m.Annotations != null)
                 {
                     object[] info = m.Annotations[0] as object[];
                     if (info[1] as string == "Lorg/neo/smartcontract/framework/Appcall;" ||
-                        info[1] as string == "Lorg/neo/smartcontract/framework/Syscall;" |
-                        info[1] as string == "Lorg/neo/smartcontract/framework/OpCode;")
+                        info[1] as string == "Lorg/neo/smartcontract/framework/Syscall;" ||
+                        info[1] as string == "Lorg/neo/smartcontract/framework/OpCode;" ||
+                        info[1] as string == "Lorg/neo/smartcontract/framework/Nonemit;")
                     {
                         //continue;
                         bskip = true;
                     }
                     //if(m.Annotations[0])
                 }
+                if (m.Name == "<init>")
+                    bskip = true;
                 var nm = new JavaMethod(this, m);
                 nm.skip = bskip;
+                if (bskip == false && methods.ContainsKey(m.Name))
+                {
+                    throw new Exception("already have a func named:" + classfile.Name + "." + m.Name);
+                }
                 this.methods[m.Name] = nm;
             }
             this.superClass = this.classfile.SuperClass;
@@ -327,7 +355,7 @@ namespace Neo.Compiler.JVM
             {
                 if (key == srcaddr)
                 {
-                    
+
                     return last;
                 }
                 last = key;
@@ -409,7 +437,7 @@ namespace Neo.Compiler.JVM
             this.arg1 = ins.Arg1;
             this.arg2 = ins.Arg2;
             this.addr = ins.PC;
-            if (method.method.LineNumberTableAttribute==null||method.method.LineNumberTableAttribute.TryGetValue(this.addr, out this.debugline) == false)
+            if (method.method.LineNumberTableAttribute == null || method.method.LineNumberTableAttribute.TryGetValue(this.addr, out this.debugline) == false)
             {
                 this.debugline = -1;
             }
