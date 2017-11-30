@@ -802,65 +802,30 @@ namespace Neo.Compiler.MSIL
                 {
                     var outbyte = new byte[number];
                     var skip = 0;
-                    int start = n2;
+                    int start = n;
                     System.Collections.Generic.Stack<int> stack = new System.Collections.Generic.Stack<int>();
-                    int value = 0;
                     //有时c#也会用填数值的方式初始化，对于byte这会出错
-                    if (n4 > 0 && method.body_Codes[n].code == CodeEx.Dup && (method.body_Codes[n4].code == CodeEx.Stelem_I || method.body_Codes[n4].code == CodeEx.Stelem_I1))
+                    while (true)
                     {
-                        skip = 1;//先跳一个dump
+                        int start2 = method.GetNextCodeAddr(start);
+                        int start3 = method.GetNextCodeAddr(start2);
+                        int start4 = method.GetNextCodeAddr(start3);
+                        if (start < 0 || start2 < 0 || start3 < 0 || start4 < 0)
+                            break;
                         var _code = method.body_Codes[start];
-                        while (_code.code != CodeEx.Stloc && _code.code != CodeEx.Stloc_0 && _code.code != CodeEx.Stloc_1 && _code.code != CodeEx.Stloc_2 && _code.code != CodeEx.Stloc_3 && _code.code != CodeEx.Stloc_S)
+                        var _code2 = method.body_Codes[start2];
+                        var _code3 = method.body_Codes[start3];
+                        var _code4 = method.body_Codes[start4];
+                        if (_code.code != CodeEx.Dup || (_code4.code != CodeEx.Stelem_I1 && _code4.code != CodeEx.Stelem_I))
                         {
-                            switch (_code.code)
-                            {
-                                case CodeEx.Ldc_I4_0:
-                                    stack.Push(0);
-                                    break;
-                                case CodeEx.Ldc_I4_1:
-                                    stack.Push(1);
-                                    break;
-                                case CodeEx.Ldc_I4_2:
-                                    stack.Push(2);
-                                    break;
-                                case CodeEx.Ldc_I4_3:
-                                    stack.Push(3);
-                                    break;
-                                case CodeEx.Ldc_I4_4:
-                                    stack.Push(4);
-                                    break;
-                                case CodeEx.Ldc_I4_5:
-                                    stack.Push(5);
-                                    break;
-                                case CodeEx.Ldc_I4_6:
-                                    stack.Push(6);
-                                    break;
-                                case CodeEx.Ldc_I4_7:
-                                    stack.Push(7);
-                                    break;
-                                case CodeEx.Ldc_I4_8:
-                                    stack.Push(8);
-                                    break;
-                                case CodeEx.Ldc_I4:
-                                    stack.Push(_code.tokenI32);
-                                    break;
-                                case CodeEx.Stelem_I1:
-                                case CodeEx.Stelem_Any:
-                                case CodeEx.Stelem_I:
-                                    {
-                                        var v = stack.Pop();
-                                        var pos = stack.Pop();
-                                        outbyte[pos] = (byte)v;
-                                    }
-                                    break;
-                            }
-
-                            start = method.GetNextCodeAddr(start);
-                            _code = method.body_Codes[start];
-                            skip++;
+                            break;
                         }
+                        var pos = _code2.tokenI32;
+                        var value = _code3.tokenI32;
+                        outbyte[pos] = (byte)value;
 
-
+                        skip += 4;
+                        start = method.GetNextCodeAddr(start4);
                     }
                     this._ConvertPush(outbyte, src, to);
                     return skip;
