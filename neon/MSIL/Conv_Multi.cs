@@ -87,8 +87,54 @@ namespace Neo.Compiler.MSIL
                 _ConvertLdLoc(method, src, to, pos);
             }
         }
-        private void _ConvertLdArg(OpCode src, NeoMethod to, int pos)
+        private void _ConvertCastclass(ILMethod method, OpCode src, NeoMethod to)
         {
+            var type = src.tokenUnknown as Mono.Cecil.TypeReference;
+            try
+            {
+                var dtype = type.Resolve();
+                if (dtype.BaseType.FullName == "System.MulticastDelegate" || dtype.BaseType.FullName == "System.Delegate")
+                {
+                    foreach (var m in dtype.Methods)
+                    {
+                        if (m.Name == "Invoke")
+                        {
+                            to.lastparam = m.Parameters.Count;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+        }
+        private void _ConvertLdArg(ILMethod method, OpCode src, NeoMethod to, int pos)
+        {
+            try
+            {
+                var ptype = method.method.Parameters[pos].ParameterType.Resolve();
+                //var ptype = method.method.Parameters[pos].ParameterType;
+                //if (ptype.BaseType.IsFunctionPointer)
+                //{
+                if (ptype.BaseType.FullName == "System.MulticastDelegate" || ptype.BaseType.FullName == "System.Delegate")
+                {
+                    foreach (var m in ptype.Methods)
+                    {
+                        if (m.Name == "Invoke")
+                        {
+                            to.lastparam = m.Parameters.Count;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+            //}
             //get array
             _Convert1by1(VM.OpCode.FROMALTSTACK, src, to);
             _Convert1by1(VM.OpCode.DUP, null, to);
@@ -308,7 +354,11 @@ namespace Neo.Compiler.MSIL
         }
         public bool IsNotifyCall(Mono.Cecil.MethodDefinition defs, Mono.Cecil.MethodReference refs, NeoMethod to, out string name)
         {
+
             name = to.lastsfieldname;
+            if (to.lastsfieldname == null)
+                return false;
+
             Mono.Cecil.TypeDefinition call = null;
             if (defs == null)
             {
@@ -330,6 +380,7 @@ namespace Neo.Compiler.MSIL
             {
                 if (call.BaseType.Name == "MulticastDelegate" || call.BaseType.Name == "Delegate")
                 {
+                    to.lastsfieldname = null;
                     return true;
                 }
             }
@@ -337,8 +388,8 @@ namespace Neo.Compiler.MSIL
             {
                 if (refs.Name == "Invoke" && refs.DeclaringType.Name.Contains("Action`"))
                 {
+                    to.lastsfieldname = null;
                     return true;
-
                 }
             }
             name = "Notify";
@@ -350,6 +401,7 @@ namespace Neo.Compiler.MSIL
 
             int calltype = 0;
             string callname = "";
+            int callpcount = 0;
             byte[] callhash = null;
             VM.OpCode callcode = VM.OpCode.NOP;
 
@@ -370,6 +422,11 @@ namespace Neo.Compiler.MSIL
             else if (IsNotifyCall(defs, refs, to, out callname))
             {
                 calltype = 5;
+            }
+            else if (to.lastparam >= 0)
+            {
+                callpcount = to.lastparam;
+                calltype = 6;
             }
             else if (IsOpCall(defs, out callname))
             {
@@ -735,6 +792,15 @@ namespace Neo.Compiler.MSIL
                     //bytes.Prepend 函数在 dotnet framework 4.6 编译不过
                     _Convert1by1(VM.OpCode.SYSCALL, null, to, outbytes);
                 }
+            }
+            else if (calltype == 6)
+            {
+                _ConvertPush(callpcount, src, to);
+                _Convert1by1(VM.OpCode.ROLL, null, to);
+                byte[] nullhash = new byte[20];
+                //dyn appcall
+                _Convert1by1(VM.OpCode.APPCALL, null, to, nullhash);
+
             }
             return 0;
         }

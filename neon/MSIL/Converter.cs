@@ -42,7 +42,23 @@ namespace Neo.Compiler.MSIL
                 logger = new DefLogger();
             }
             this.logger = logger;
+#if NET47
+            try
+            {
+                var assm = System.Reflection.Assembly.GetAssembly(typeof(System.Action));
+                var name = System.IO.Path.GetFileName(assm.Location);
+                if (name.ToLower() == "mscorlib.dll")
+                {
+                    var path = System.IO.Path.GetFullPath(".");
+                    System.IO.File.Copy(assm.Location, System.IO.Path.Combine(path, name));
+                }
+            }
+            catch
+            {
 
+            }
+            //assm.Location
+#endif
         }
 
         ILogger logger;
@@ -522,22 +538,22 @@ namespace Neo.Compiler.MSIL
                     break;
 
                 case CodeEx.Ldarg_0:
-                    _ConvertLdArg(src, to, 0);
+                    _ConvertLdArg(method, src, to, 0);
                     break;
                 case CodeEx.Ldarg_1:
-                    _ConvertLdArg(src, to, 1);
+                    _ConvertLdArg(method, src, to, 1);
                     break;
                 case CodeEx.Ldarg_2:
-                    _ConvertLdArg(src, to, 2);
+                    _ConvertLdArg(method, src, to, 2);
                     break;
                 case CodeEx.Ldarg_3:
-                    _ConvertLdArg(src, to, 3);
+                    _ConvertLdArg(method, src, to, 3);
                     break;
                 case CodeEx.Ldarg_S:
                 case CodeEx.Ldarg:
                 case CodeEx.Ldarga:
                 case CodeEx.Ldarga_S:
-                    _ConvertLdArg(src, to, src.tokenI32);
+                    _ConvertLdArg(method, src, to, src.tokenI32);
                     break;
 
                 case CodeEx.Starg_S:
@@ -814,6 +830,7 @@ namespace Neo.Compiler.MSIL
                     break;
 
                 case CodeEx.Castclass:
+                    _ConvertCastclass(method, src, to);
                     break;
 
                 case CodeEx.Box:
