@@ -207,33 +207,6 @@ namespace Neo.Compiler.MSIL
 
 
         }
-        public bool IsEntryCall(Mono.Cecil.MethodDefinition defs, out byte id)
-        {
-            if (defs == null)
-            {
-                id = 0;
-                return false;
-            }
-            foreach (var attr in defs.CustomAttributes)
-            {
-                if (attr.AttributeType.Name == "EntryPointAttribute")
-                {
-                    var type = attr.ConstructorArguments[0].Type;
-                    var value = (byte)attr.ConstructorArguments[0].Value;
-
-                    //dosth
-                    id = value;
-                    return true;
-
-
-
-                }
-                //if(attr.t)
-            }
-            id = 0;
-            return false;
-
-        }
         public bool IsAppCall(Mono.Cecil.MethodDefinition defs, out byte[] hash)
         {
             if (defs == null)
