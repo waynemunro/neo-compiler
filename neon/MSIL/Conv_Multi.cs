@@ -283,6 +283,10 @@ namespace Neo.Compiler.MSIL
                 {
                     return true;
                 }
+                if(attr.AttributeType.Name== "NonemitWithConvertAttribute")
+                {
+                    throw new Exception("NonemitWithConvert func only used for readonly static field.");
+                }
                 //if(attr.t)
             }
             return false;
