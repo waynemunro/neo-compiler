@@ -144,6 +144,22 @@ namespace Neo.Compiler.MSIL
                     //try
                     {
                         nm.returntype = m.Value.returntype;
+                        try
+                        {
+                            var type = m.Value.method.ReturnType.Resolve();
+                            foreach(var i in type.Interfaces)
+                            {
+                                if(i.Name== "IApiInterface")
+                                {
+                                    nm.returntype = "IInteropInterface";
+                                }
+                            }
+                        }
+                        catch (Exception err)
+                        {
+
+                        }
+
                         foreach (var src in m.Value.paramtypes)
                         {
                             nm.paramtypes.Add(new NeoParam(src.name, src.type));
