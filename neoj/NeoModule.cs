@@ -138,7 +138,10 @@ namespace Neo.Compiler
         //    //将body链接，生成this.code       byte[]
         //    //并计算 this.codehash            byte[]
         //}
-        public string lastsfieldname;
+        public string lastsfieldname =null;//最后一个加载的静态成员的名字，仅event使用
+
+        public int lastparam = -1;//最后一个加载的参数对应
+        public int lastCast = -1;
     }
     public class NeoEvent
     {

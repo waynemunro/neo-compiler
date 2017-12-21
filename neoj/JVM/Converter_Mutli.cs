@@ -70,7 +70,21 @@ namespace Neo.Compiler.JVM
             //pick
             _Convert1by1(VM.OpCode.PICK, null, to);
         }
+        public bool IsNonCall(JavaMethod method)
+        {
+            if (method != null)
+                if (method.method.Annotations != null)
+                {
 
+                    object[] op = method.method.Annotations[0] as object[];
+                    if (op[1] as string == "Lorg/neo/smartcontract/framework/Nonemit;")
+                    {
+                        return true;
+                    }
+                }
+
+            return false;
+        }
         public bool IsOpCall(JavaMethod method, OpCode src, out string callname)
         {
             if (method != null)
@@ -206,8 +220,11 @@ namespace Neo.Compiler.JVM
             string callname = "";
             byte[] callhash = null;
             VM.OpCode callcode = VM.OpCode.NOP;
-
-            if (IsOpCall(_javamethod, src, out callname))
+            if (IsNonCall(_javamethod))
+            {
+                return 0;
+            }
+            else if (IsOpCall(_javamethod, src, out callname))
             {
                 if (System.Enum.TryParse<VM.OpCode>(callname, out callcode))
                 {
