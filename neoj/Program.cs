@@ -27,6 +27,7 @@ namespace Neo.Compiler
             }
             string filename = args[0];
             string onlyname = System.IO.Path.GetFileNameWithoutExtension(filename);
+            string extension = System.IO.Path.GetExtension(filename);
             //javaloader.ClassFile classFile = null;
             JavaModule module = new JavaModule();
 
@@ -39,7 +40,16 @@ namespace Neo.Compiler
                 var path = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
                 path = System.IO.Path.GetDirectoryName(path);
                 module.LoadJar(System.IO.Path.Combine(path, "org.neo.smartcontract.framework.jar"));
-                module.LoadClass(filename);
+
+		if (extension == ".jar")
+		{
+		    module.LoadJar(filename);
+		}
+		else
+		{
+		    module.LoadClass(filename);
+		}
+
                 var conv = new ModuleConverter(log);
 
                 NeoModule am = conv.Convert(module);
