@@ -844,7 +844,7 @@ namespace Neo.Compiler.MSIL
                 case CodeEx.Ldsfld:
 
                     {
-
+                        _Convert1by1(VM.OpCode.NOP, src, to);
                         var d = src.tokenUnknown as Mono.Cecil.FieldDefinition;
                         //如果是readonly，可以pull个常量上来的
                         if (
