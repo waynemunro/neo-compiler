@@ -1,5 +1,6 @@
 ﻿using Neo.Compiler.MSIL;
 using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -29,6 +30,20 @@ namespace Neo.Compiler
             string filename = args[0];
             string onlyname = System.IO.Path.GetFileNameWithoutExtension(filename);
             string filepdb = onlyname + ".pdb";
+
+            var path = Path.GetDirectoryName(filename);
+            if (!string.IsNullOrEmpty(path))
+            {
+                try
+                {
+                    Directory.SetCurrentDirectory(path);
+                }
+                catch
+                {
+                    log.Log("Could not find path: " + path);
+                    Environment.Exit(-1);
+                }
+            }
 
             ILModule mod = new ILModule();
             System.IO.Stream fs = null;
