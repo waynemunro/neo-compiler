@@ -1,6 +1,8 @@
 ﻿using Neo.Compiler.MSIL;
 using System;
+using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace Neo.Compiler
 {
@@ -28,6 +30,20 @@ namespace Neo.Compiler
             string filename = args[0];
             string onlyname = System.IO.Path.GetFileNameWithoutExtension(filename);
             string filepdb = onlyname + ".pdb";
+
+            var path = Path.GetDirectoryName(filename);
+            if (!string.IsNullOrEmpty(path))
+            {
+                try
+                {
+                    Directory.SetCurrentDirectory(path);
+                }
+                catch
+                {
+                    log.Log("Could not find path: " + path);
+                    Environment.Exit(-1);
+                }
+            }
 
             ILModule mod = new ILModule();
             System.IO.Stream fs = null;
@@ -61,14 +77,30 @@ namespace Neo.Compiler
             }
             byte[] bytes = null;
             bool bSucc = false;
+            string jsonstr = null;
             //convert and build
             try
             {
                 var conv = new ModuleConverter(log);
 
-                AntsModule am = conv.Convert(mod);
+                NeoModule am = conv.Convert(mod);
                 bytes = am.Build();
                 log.Log("convert succ");
+
+
+                try
+                {
+                    var outjson = vmtool.FuncExport.Export(am, bytes);
+                    StringBuilder sb = new StringBuilder();
+                    outjson.ConvertToStringWithFormat(sb, 0);
+                    jsonstr = sb.ToString();
+                    log.Log("gen abi succ");
+                }
+                catch (Exception err)
+                {
+                    log.Log("gen abi Error:" + err.ToString());
+                }
+
             }
             catch (Exception err)
             {
@@ -89,6 +121,21 @@ namespace Neo.Compiler
             catch (Exception err)
             {
                 log.Log("Write Bytes Error:" + err.ToString());
+                return;
+            }
+            try
+            {
+
+                string abiname = onlyname + ".abi.json";
+
+                System.IO.File.Delete(abiname);
+                System.IO.File.WriteAllText(abiname, jsonstr);
+                log.Log("write:" + abiname);
+                bSucc = true;
+            }
+            catch (Exception err)
+            {
+                log.Log("Write abi Error:" + err.ToString());
                 return;
             }
             try
